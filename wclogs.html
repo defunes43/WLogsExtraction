@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Extract stuff from Warcraft logs</title>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+
+<body>
+<span>Boss:</span>
+<select id="zoneSelect">
+<option value="2032">Goroth</option>
+<option value="2048">Demonic Inquisition</option>
+<option value="2036">Harjatan</option>
+<option value="2037">Mistress Sassz'ine</option>
+<option value="2050">Sisters of the Moon</option>
+<option value="2054">The Desolate Host</option>
+<option value="2052">Maiden of Vigilance</option>
+<option value="2038">Fallen Avatar</option>
+<option value="2051">Kil'jaeden</option>
+</select>
+
+</br>
+
+<span>Difficulty:</span>
+<select id="difficultySelect">
+<option value="1">LFR</option>
+<option value="3">Normal</option>
+<option value="4">Heroic</option>
+<option value="5">Mythic</option>
+</select>
+
+</br>
+	
+<span>Class:</span>
+<select id="classSelect">
+
+</select>
+
+<button onclick="getData()">getData</button>
+
+</br>
+
+Average EQ Damage: <span id=average></span> %
+
+</br>
+
+<table id="resultsTable">
+	<thead>
+		<th>Name</th>
+		<th>ReportID</th>
+		<th>Rank</th>
+		<th>EQ pct</th>
+	</thead>
+	<tbody>
+	
+	</tbody>
+</table>
+
+<script>
+const classes=
+[
+    {
+        "id": 1,
+        "name": "Death Knight",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Blood"
+            },
+            {
+                "id": 2,
+                "name": "Frost"
+            },
+            {
+                "id": 3,
+                "name": "Unholy"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "name": "Druid",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Balance"
+            },
+            {
+                "id": 2,
+                "name": "Feral"
+            },
+            {
+                "id": 3,
+                "name": "Guardian"
+            },
+            {
+                "id": 4,
+                "name": "Restoration"
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "name": "Hunter",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Beast Mastery"
+            },
+            {
+                "id": 2,
+                "name": "Marksmanship"
+            },
+            {
+                "id": 3,
+                "name": "Survival"
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "name": "Mage",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Arcane"
+            },
+            {
+                "id": 2,
+                "name": "Fire"
+            },
+            {
+                "id": 3,
+                "name": "Frost"
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "name": "Monk",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Brewmaster"
+            },
+            {
+                "id": 2,
+                "name": "Mistweaver"
+            },
+            {
+                "id": 3,
+                "name": "Windwalker"
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "name": "Paladin",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Holy"
+            },
+            {
+                "id": 2,
+                "name": "Protection"
+            },
+            {
+                "id": 3,
+                "name": "Retribution"
+            }
+        ]
+    },
+    {
+        "id": 7,
+        "name": "Priest",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Discipline"
+            },
+            {
+                "id": 2,
+                "name": "Holy"
+            },
+            {
+                "id": 3,
+                "name": "Shadow"
+            }
+        ]
+    },
+    {
+        "id": 8,
+        "name": "Rogue",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Assassination"
+            },
+            {
+                "id": 2,
+                "name": "Combat"
+            },
+            {
+                "id": 3,
+                "name": "Subtlety"
+            },
+            {
+                "id": 4,
+                "name": "Outlaw"
+            }
+        ]
+    },
+    {
+        "id": 9,
+        "name": "Shaman",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Elemental"
+            },
+            {
+                "id": 2,
+                "name": "Enhancement"
+            },
+            {
+                "id": 3,
+                "name": "Restoration"
+            }
+        ]
+    },
+    {
+        "id": 10,
+        "name": "Warlock",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Affliction"
+            },
+            {
+                "id": 2,
+                "name": "Demonology"
+            },
+            {
+                "id": 3,
+                "name": "Destruction"
+            }
+        ]
+    },
+    {
+        "id": 11,
+        "name": "Warrior",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Arms"
+            },
+            {
+                "id": 2,
+                "name": "Fury"
+            },
+            {
+                "id": 3,
+                "name": "Protection"
+            },
+            {
+                "id": 4,
+                "name": "Gladiator"
+            }
+        ]
+    },
+    {
+        "id": 12,
+        "name": "Demon Hunter",
+        "specs": [
+            {
+                "id": 1,
+                "name": "Havoc"
+            },
+            {
+                "id": 2,
+                "name": "Vengeance"
+            }
+        ]
+    }
+];
+let results = [];
+$(document).ready(function(){
+//Fill the classes select with the data (Much easier than writing it all as html)
+$.each(classes, function(i, oClass) {
+            $('#classSelect').append($('<option>').text(oClass.name).attr('value', oClass.id));
+			$.each(oClass.specs,function(i, spec){
+				$('#classSelect').append($('<option>').text('|'+spec.name).attr('value', oClass.id + '|' + spec.id));
+			});
+        });
+});
+
+//On buton click
+function getData(){
+//Reset results
+results = [];
+	let promises = [];
+	for (var i=0;i<50;i++) {
+		//On number between 1 and 100, offset by i00
+		let rankNbr = (Math.floor(Math.random() * 99) + 1)+(100*i)
+		let data={
+		'api_key':'d6207c18cd4c8980bcab7c7f21b60172',
+		'metric':'dps',
+		'difficulty':$('#difficultySelect').val(),
+		'class':$('#classSelect').val().split('|')[0],
+		'spec':$('#classSelect').val().split('|')[1],
+		'limit':1,
+		'page': rankNbr
+		}
+		
+		//Get rankings at selected rank number
+		promises.push($.get("https://www.warcraftlogs.com/v1/rankings/encounter/"+$("#zoneSelect").val(),data).then(function(data){
+			//Most of the time only one report, but it might be more in the future
+			var loopPromises = []
+			for (var i=0;i<data.rankings.length;i++) {
+				loopPromises.push(getEQpct(data.rankings[i],rankNbr));
+			}
+			return $.when.apply($, loopPromises)
+		}));
+	}
+	
+	//Once all async operations are done, fill in the results
+	$.when.apply($, promises).then(function() {
+			var sum = 0;
+			for( var i = 0; i < results.length; i++ ){
+				sum += results[i].EQPercent;
+			}
+			var avg = sum/results.length;
+			$("#average").text(avg);
+			
+			for (var i=0;i<results.sort(function(a,b){return a.rankNbr - b.rankNbr;}).length;i++){
+				var row = document.createElement("tr");
+				
+				var nameCell = document.createElement("td");
+				row.appendChild(nameCell);
+				nameCell.innerText = results[i].name;
+				
+				var reportIDCell = document.createElement("td");
+				row.appendChild(reportIDCell);
+				reportIDCell.innerText = results[i].reportID;
+				
+				var rankCell = document.createElement("td");
+				row.appendChild(rankCell);
+				rankCell.innerText = results[i].rankNbr;
+				
+				var EQPctCell = document.createElement("td");
+				row.appendChild(EQPctCell);
+				EQPctCell.innerText = results[i].EQPercent.toFixed(2);
+		
+				$("#resultsTable>tbody").append(row);
+			}
+		});
+	
+}
+
+function getEQpct(ranking,rankNbr){
+	let fightData={
+	'api_key':'d6207c18cd4c8980bcab7c7f21b60172',
+	'translate':false
+	}
+	//Get fight info from the report (start and end time needed to get damage)
+	return $.get("https://www.warcraftlogs.com:443/v1/report/fights/"+ranking.reportID,fightData).then(function(data){
+		let damagedata={
+		'api_key':'d6207c18cd4c8980bcab7c7f21b60172',
+		'start':data.fights[ranking.fightID-1].start_time, //ID #1 is in 0th position in the array.
+		'end':data.fights[ranking.fightID-1].end_time,
+		'filter':"source.name='"+ranking.name+"'",
+		'translate':false
+		}
+		//Get damage, add EQ percent to rank information
+		return $.get("https://www.warcraftlogs.com:443/v1/report/tables/damage-done/"+ranking.reportID,damagedata).then(function(data){
+			let totalDamage;
+			try {totalDamage = data.entries[0].total;} catch(err) {return;}
+			let EQDamage;
+			try {EQDamage = data.entries[0].abilities.filter(function(ability) {return ability.name == "Earthquake"})[0].total;} catch(err) {EQDamage = 0;}
+			
+			let SSDamage;
+			try {SSDamage = data.entries[0].abilities.filter(function(ability) {return ability.name == "Seismic Lightning"})[0].total;} catch(err) {SSDamage = 0;}
+			
+			ranking.EQPercent = (EQDamage+SSDamage)/totalDamage * 100;
+			ranking.rankNbr = rankNbr
+			results.push(ranking);
+		});
+	},function() {return;});
+}
+</script>
+</body>
+
+</html>
